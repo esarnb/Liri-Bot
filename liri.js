@@ -49,6 +49,7 @@ function concertThis(artist) {
         
         console.log("Venues: \n\n");
         for (resp of response.data) {
+            console.log();//Spacer
             var theLocation = "";
             var theVenue = resp.venue.name;
             var theDate = moment(resp.datetime).format("LLLL");
@@ -66,88 +67,55 @@ function concertThis(artist) {
     })
 }
 
-/*
-    Usage: node liri.js spotify-this-song '<song name here>'
-    
-    Return:
-        Artist(s)
-        The Song's Name
-        A preview link of the song from Spotify
-        The Album that the song is from
-
-    
-If no song is provided then your program will default to "The Sign" by Ace of Base.
-
-
-You will utilize the node-spotify-api package in order to retrieve song information from the Spotify API.
-
-
-The Spotify API requires you sign up as a developer to generate the necessary credentials. You can follow these steps in order to generate a client id and client secret:
-
-
-Step One: Visit https://developer.spotify.com/my-applications/#!/
-
-
-Step Two: Either login to your existing Spotify account or create a new one (a free account is fine) and log in.
-
-
-Step Three: Once logged in, navigate to https://developer.spotify.com/my-applications/#!/applications/create to register a new application to be used with the Spotify API. You can fill in whatever you'd like for these fields. When finished, click the "complete" button.
-
-
-Step Four: On the next screen, scroll down to where you see your client id and client secret. Copy these values down somewhere, you'll need them to use the Spotify API and the node-spotify-api package.
-*/
 function spotifyThis(song) {
     song ? null : song = "The Sign" //"The Sign" by Ace of Base
     spotify.search({ type: 'track', query: song }, function(err, data) {
         if (err) console.log(err);
-        console.log();
-        
+        console.log();//Spacer
         for (var i = 0; i < data.tracks.items.length; i++) {
             var name = data.tracks.items[i].name
-            var preview = data.tracks.items[i].preview_url;
             var album = data.tracks.items[i].album.name;
+            var preview = data.tracks.items[i].preview_url;
+            var artists = data.tracks.items[i].album.artists
             //If any of these exist, add it to the response;
             var resp = "";
             name ? resp+=`Song: ${name}\n`:null;
+            artists ? resp += `Artist(s): ${artists}`:null;
             album ? resp+=`Album: ${album}\n`:null;
             preview ? resp+=`Link: ${preview}\n`:null;
             console.log(resp,"\n");
-            
         }
     });
 }
 
-
-/*
-    Usage: node liri.js movie-this '<movie name here>'
-    
-    Return:
-        * Title of the movie.
-        * Year the movie came out.
-        * IMDB Rating of the movie.
-        * Rotten Tomatoes Rating of the movie.
-        * Country where the movie was produced.
-        * Language of the movie.
-        * Plot of the movie.
-        * Actors in the movie.
-     
+function movieThis(title) {
+    title ? null : title = "Mr. Nobody" //If no title, use "Mr. Nobody"
+    var queryURL = "https://www.omdbapi.com/?t=" + title + "&y=&plot=short&apikey=trilogy";
+    axios.get(queryURL).then(function(response) {
+        var resp = "";
+        console.log(queryURL);
         
-If the user doesn't type a movie in, the program will output data for the movie 'Mr. Nobody.'
+        var plot = response.data.Plot;
+        var title = response.data.Title;
+        var actors = response.data.Actors;
+        var country = response.data.Country;
+        var language = response.data.Language;
+        var released = response.data.Released;
+        var imdbRating = response.data.imdbRating
+        var rating = response.data.Ratings.find(obj => obj.Source === "Rotten Tomatoes").Value;
 
-
-If you haven't watched "Mr. Nobody," then you should: http://www.imdb.com/title/tt0485947/
-
-
-It's on Netflix!
-
-
-
-
-You'll use the axios package to retrieve data from the OMDB API. Like all of the in-class activities, the OMDB API requires an API key. You may use trilogy.
-
-*/
-function movieThis() {
-
+        //Conditionals to check for validity on each property asked for; concat all available info.
+        title ? resp+= `Title: ${title}\n` : null;
+        released ? resp+= `Released: ${released}\n` : null;
+        imdbRating ? resp+= `IMDB Rating: ${imdbRating}\n` : null;
+        rating ? resp+= `Rotten Tomato Rating: ${rating}\n` : null;
+        country ? resp+= `Country: ${country}\n` : null;
+        language ? resp+= `Language: ${language}\n` : null;
+        actors ? resp+= `Actors: ${actors}\n` : null;
+        plot ? resp+= `\nPlot: ${plot}\n` : null;
+        console.log();//Spacer        
+        console.log(resp);
+    })
 }
 
 
@@ -175,7 +143,7 @@ function dwis() {
 var args = convertProcess(process.argv);
 if (!args[0]) return console.log("You need to specify an action!");
 
-
+// console.clear(); //Clears console for better readability
 
 switch(args[0]) {
 
@@ -190,7 +158,8 @@ switch(args[0]) {
     break;
 
     case "movie-this": 
-        movieThis()
+        //if no args => default to "Mr.Nobody"
+        movieThis(args.slice(1, args.length).join(" "))
     break;
 
     case "do-what-it-says":
