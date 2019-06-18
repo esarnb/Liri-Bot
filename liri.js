@@ -26,23 +26,26 @@ var spotify = new Spotify(keys.spotify)
  * 
  * The function takes in the array, slices out the node-location and file-executed-location
  * and converts all inputted numbers into floats, then returns the final array.
+ * (Floats are unnecessary for this project, so that loop is commented out).
  * 
  * The purpose of the function is to easily parse through the process.argv to use user inputs.
  */
 function convertProcess(unedited) { 
     var args = unedited.slice(2); 
-    for (var i = 0; i < args.length; i++) { 
-        if (!isNaN(args[i])) { 
-            args[i] = parseFloat(args[i]); 
-            /*console.log(args[i])*/ 
-        }
-    }; 
+    // for (var i = 0; i < args.length; i++) { 
+    //     if (!isNaN(args[i])) { 
+    //         args[i] = parseFloat(args[i]); 
+    //         /*console.log(args[i])*/ 
+    //     }
+    // }; 
     return args; 
 }
 
 /**
  * 
- * @param {String} artist is the artist or bad the user inputs.
+ * @param {String} artist is the artist or band the user inputs.
+ * 
+ * Function makes an api call to bandsintown, appends all info available to a string, then logs the string to console and txt file.
  * 
  */
 function concertThis(artist) {
@@ -65,6 +68,12 @@ function concertThis(artist) {
     })
 }
 
+/**
+ * 
+ * @param {String} song  is the song inputted by the user to search on spotify.
+ * 
+ * Function makes an api call to spotify, appends all info available to a string, then logs the string to console and txt file.  
+ */
 function spotifyThis(song) {
     song ? null : song = "The Sign" //"The Sign" by Ace of Base
     spotify.search({ type: 'track', query: song }, function(err, data) {
@@ -91,6 +100,12 @@ function spotifyThis(song) {
 
 }
 
+/**
+ * 
+ * @param {String} title is the movie title the user inputs to be searched on omdb.
+ * 
+ * Function makes an api call to omdb, appends all info available to a string, then logs the string to console and txt file.  
+ */
 function movieThis(title) {
     title ? null : title = "Mr. Nobody" //If no title, use "Mr. Nobody"
     var queryURL = "https://www.omdbapi.com/?t=" + title + "&y=&plot=short&apikey=trilogy";
@@ -121,6 +136,11 @@ function movieThis(title) {
     })
 }
 
+/**
+ * 
+ * @param {String} cmd is the executed command the user put as the first argument.
+ * @param {String} data is the response based on the executed command; each function has one response string.
+ */
 function logTxt(cmd, data) {
     var logData = {
         timestamp: moment().format("LLLL"),
@@ -128,17 +148,29 @@ function logTxt(cmd, data) {
         data: data 
     }
     fs.appendFile("log.txt", JSON.stringify(logData) , function(err) {
-
+        if (err) return console.log(err);
     })
 }
 
+/*
+     Work Done
+ */
 var args = convertProcess(process.argv);
 if (!args[0]) return console.log("You need to specify an action!");
 
 // console.clear(); //Clears console for better readability
 
+//Reads in first input, given by user.
 runCmds(args[0], args.slice(1, args.length).join(" "))
 
+/**
+ * 
+ * @param {String} input is the command ran by user or by the random.txt file.
+ * @param {String} value is the value to be inserted to one of the functions to search with.
+ * 
+ * Function uses a switch case on the command to pick which api to use. 
+ * If the do-what-it-says is chosen, then all available commands in the random.txt file is ran one by one.
+ */
 function runCmds(input, value){
     switch(input) {
 
