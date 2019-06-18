@@ -48,23 +48,20 @@ function convertProcess(unedited) {
 function concertThis(artist) {
     axios.get("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp").then((response) => {
         console.log("----------------------------------------------------------------");
-        
+        var finalAnswer = "";
         for (resp of response.data) {
-            console.log();//Spacer
             var theLocation = "";
             var theVenue = resp.venue.name;
             var theDate = moment(resp.datetime).format("LLLL");
 
             //If one of these exist, add it to the location string
-            resp.venue.region ? theLocation += `Region: ${resp.venue.region}` : null
-            resp.venue.country ? theLocation += `Country: ${resp.venue.country}` : null
-            resp.venue.region ? theLocation += `City: ${resp.venue.city}` : null
-            
-            console.log(`Venue: ${theVenue}`)
-            console.log(`Location: ${theLocation}`)
-            console.log(`Date: ${theDate}`)
-            console.log();//Spacer
+            resp.venue.region ? theLocation += `Region: ${resp.venue.region}\n` : null
+            resp.venue.country ? theLocation += `Country: ${resp.venue.country}\n` : null
+            resp.venue.city ? theLocation += `City: ${resp.venue.city}\n` : null
+            finalAnswer += `\n\nVenue: ${theVenue}\n${theLocation}Date: ${theDate}`;
+            console.log(finalAnswer)
         }
+        logTxt("concert-this", finalAnswer)
     })
 }
 
@@ -74,6 +71,7 @@ function spotifyThis(song) {
         if (err) return console.log(err);
         console.log("----------------------------------------------------------------");
         console.log();//spacer
+        var finalAnswer = "";
         for (var i = 0; i < data.tracks.items.length; i++) {
             var name = data.tracks.items[i].name
             var album = data.tracks.items[i].album.name;
@@ -86,7 +84,9 @@ function spotifyThis(song) {
             album ? resp+=`Album: ${album}\n`:null;
             preview ? resp+=`Link: ${preview}\n`:null;
             console.log(resp,"\n");
+            finalAnswer += (resp+"\n")
         }
+        logTxt("spotify-this-song", finalAnswer)
     });
 
 }
@@ -117,6 +117,18 @@ function movieThis(title) {
         plot ? resp+= `\nPlot: ${plot}\n` : null;
         console.log();//Spacer        
         console.log(resp);
+        logTxt("movie-this", resp)
+    })
+}
+
+function logTxt(cmd, data) {
+    var logData = {
+        timestamp: moment().format("LLLL"),
+        command: cmd,
+        data: data 
+    }
+    fs.appendFile("log.txt", JSON.stringify(logData) , function(err) {
+
     })
 }
 
@@ -132,7 +144,9 @@ function runCmds(input, value){
 
         case "concert-this":
             if (!value) return console.log("You need to specify a band!");
-            else concertThis(value)
+            else {
+                concertThis(value);
+            }
         break;
 
         case "spotify-this-song":
@@ -160,6 +174,6 @@ function runCmds(input, value){
         break;
 
         default: console.log("Could not understand the action.");
-        
+        break;
     }
 }
