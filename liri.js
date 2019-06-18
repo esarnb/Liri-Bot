@@ -65,11 +65,11 @@ function spotifyThis(song) {
             var name = data.tracks.items[i].name
             var album = data.tracks.items[i].album.name;
             var preview = data.tracks.items[i].preview_url;
-            var artists = data.tracks.items[i].album.artists
+            var artists = data.tracks.items[i].album.artists[0].name
             //If any of these exist, add it to the response;
             var resp = "";
             name ? resp+=`Song: ${name}\n`:null;
-            artists ? resp += `Artist(s): ${artists}`:null;
+            artists ? resp += `Artist(s): ${artists}\n`:null;
             album ? resp+=`Album: ${album}\n`:null;
             preview ? resp+=`Link: ${preview}\n`:null;
             console.log(resp,"\n");
