@@ -3,15 +3,17 @@ require("dotenv").config();
 /*
     Packages
 */
+
+var fs = require("fs");
 var axios = require("axios");
 var moment = require("moment");
-var Spotify = require("node-spotify-api")
+var Spotify = require("node-spotify-api");
+
 /*
     Global Variables
 */
 
 var keys = require("./keys.js")
-
 var spotify = new Spotify(keys.spotify)
 
 /*
@@ -38,7 +40,6 @@ function convertProcess(unedited) {
     return args; 
 }
 
-
 /**
  * 
  * @param {String} artist is the artist or bad the user inputs.
@@ -46,8 +47,8 @@ function convertProcess(unedited) {
  */
 function concertThis(artist) {
     axios.get("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp").then((response) => {
+        console.log("----------------------------------------------------------------");
         
-        console.log("Venues: \n\n");
         for (resp of response.data) {
             console.log();//Spacer
             var theLocation = "";
@@ -70,8 +71,9 @@ function concertThis(artist) {
 function spotifyThis(song) {
     song ? null : song = "The Sign" //"The Sign" by Ace of Base
     spotify.search({ type: 'track', query: song }, function(err, data) {
-        if (err) console.log(err);
-        console.log();//Spacer
+        if (err) return console.log(err);
+        console.log("----------------------------------------------------------------");
+        console.log();//spacer
         for (var i = 0; i < data.tracks.items.length; i++) {
             var name = data.tracks.items[i].name
             var album = data.tracks.items[i].album.name;
@@ -86,15 +88,15 @@ function spotifyThis(song) {
             console.log(resp,"\n");
         }
     });
+
 }
 
 function movieThis(title) {
     title ? null : title = "Mr. Nobody" //If no title, use "Mr. Nobody"
     var queryURL = "https://www.omdbapi.com/?t=" + title + "&y=&plot=short&apikey=trilogy";
     axios.get(queryURL).then(function(response) {
+        console.log("----------------------------------------------------------------");  
         var resp = "";
-        console.log(queryURL);
-        
         var plot = response.data.Plot;
         var title = response.data.Title;
         var actors = response.data.Actors;
@@ -118,54 +120,46 @@ function movieThis(title) {
     })
 }
 
-
-/*
-    Usage: node liri.js do-what-it-says
-    
-    Return:
-        Artist(s)
-        The Song's Name
-        A preview link of the song from Spotify
-        The Album that the song is from
-
-Using the fs Node package, LIRI will take the text inside of random.txt and then use it to call one of LIRI's commands.
-
-
-It should run spotify-this-song for "I Want it That Way," as follows the text in random.txt.
-
-
-Edit the text in random.txt to test out the feature for movie-this and concert-this.
-*/
-function dwis() {
-
-}
-
 var args = convertProcess(process.argv);
 if (!args[0]) return console.log("You need to specify an action!");
 
 // console.clear(); //Clears console for better readability
 
-switch(args[0]) {
+runCmds(args[0], args.slice(1, args.length).join(" "))
 
-    case "concert-this":
-        if (!args[1]) return console.log("You need to specify a band!");
-        else concertThis(args.slice(1, args.length).join(" "))
-    break;
+function runCmds(input, value){
+    switch(input) {
 
-    case "spotify-this-song":
-        //if no args => default to 'The Sign'
-        spotifyThis(args.slice(1, args.length).join(" "))
-    break;
+        case "concert-this":
+            if (!value) return console.log("You need to specify a band!");
+            else concertThis(value)
+        break;
 
-    case "movie-this": 
-        //if no args => default to "Mr.Nobody"
-        movieThis(args.slice(1, args.length).join(" "))
-    break;
+        case "spotify-this-song":
+            //if no args => default to 'The Sign'
+            spotifyThis(value)
+        break;
 
-    case "do-what-it-says":
-        dwis()
-    break;
+        case "movie-this": 
+            //if no args => default to "Mr.Nobody"
+            movieThis(value)
+        break;
 
-    default: console.log("Could not understand the action.");
-    
+        case "do-what-it-says":
+            fs.readFile("random.txt", "utf8", function(err, response) {
+                if (err) return console.log(err);
+                var perCmd = response.split(" | ");
+
+                //Literally the only way this recursion can work is if there no quotes, afaik.
+                //It tries to search with quotes which errors concert-this. 
+                var list = perCmd.map(x => x.replace('"',"").replace('"',"").split(","));
+                for(each of list) {
+                    runCmds(each[0], each[1])
+                }
+            })
+        break;
+
+        default: console.log("Could not understand the action.");
+        
+    }
 }
