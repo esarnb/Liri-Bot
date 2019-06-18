@@ -1,11 +1,25 @@
-# Liri-Bot
+# Liri-node-app
 
-![alt text](images/inquirer.gif)
-The gif shows the three individual options being executed, and then the random.txt cmd reader. All responses were logged into log.txt.
+## Demonstration
+* Searching for an Artist or Band on BandsInTown:
+
+![Artist Query](images/venues.gif)
+
+* Searching for a song on Spotify:
+
+![Spotify Query](images/spotify.gif)
+
+* Searching for a movie on OMDB: 
+
+![Movie Query](images/movie.gif)
+
+* Using Random.txt to run all three:
+
+![Running all 3 commands](images/choose4me.gif)
 
 ----
 
-Liri-Bot is a Language Interpretation and Recognition Interface through the command line that takes in parameters and gives back data based on a specific command you tell it to do. 
+Liri-node-app is a Language Interpretation and Recognition Interface through the command line that takes in parameters and gives back data based on a specific command you tell it to do. 
 
 Liri also saves all of it's responses in a log.txt file, including a timestamp of exactly when the command was used.
 
@@ -21,8 +35,8 @@ You will need all of the files in this repository for Liri to work, except for t
 ```dsconfig
 # Spotify API keys
 
-SPOTIFY_ID=Your32DigitKeyHere
-SPOTIFY_SECRET=Your32DigitSecretHere
+SPOTIFY_ID=ReplaceThisWithYour32DigitKeyHere
+SPOTIFY_SECRET=ReplaceThisWithYour32DigitSecretHere
 
 ```
 
@@ -55,6 +69,8 @@ To run this on your machine after you setup nodejs and download the repository, 
 * [Inquirer*](https://www.npmjs.com/package/inquirer)
 * [Moment*](https://www.npmjs.com/package/moment)
 * [Javascript](https://www.w3schools.com/js/)
+* [OMDB API](https://www.omdbapi.com/)
+* [BandsInTown API](https://rest.bandsintown.com)
 * [Node-Spotify-API*](https://www.npmjs.com/package/node-spotify-api)
 
 *These are packages installed by NPM: [Node Package Manager](https://www.npmjs.com/).
