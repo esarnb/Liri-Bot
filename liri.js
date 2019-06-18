@@ -8,6 +8,7 @@ var fs = require("fs");
 var axios = require("axios");
 var moment = require("moment");
 var Spotify = require("node-spotify-api");
+var inquirer = require('inquirer');
 
 /*
     Global Variables
@@ -19,27 +20,6 @@ var spotify = new Spotify(keys.spotify)
 /*
     Functions
 */
-
-/**
- * 
- * @param {Array} unedited is the unedited process.argv list used to gather user input.
- * 
- * The function takes in the array, slices out the node-location and file-executed-location
- * and converts all inputted numbers into floats, then returns the final array.
- * (Floats are unnecessary for this project, so that loop is commented out).
- * 
- * The purpose of the function is to easily parse through the process.argv to use user inputs.
- */
-function convertProcess(unedited) { 
-    var args = unedited.slice(2); 
-    // for (var i = 0; i < args.length; i++) { 
-    //     if (!isNaN(args[i])) { 
-    //         args[i] = parseFloat(args[i]); 
-    //         /*console.log(args[i])*/ 
-    //     }
-    // }; 
-    return args; 
-}
 
 /**
  * 
@@ -86,7 +66,7 @@ function spotifyThis(song) {
             var album = data.tracks.items[i].album.name;
             var preview = data.tracks.items[i].preview_url;
             var artists = data.tracks.items[i].album.artists[0].name
-            
+
             //If any of these exist, add it to the response;
             var resp = "";
             name ? resp+=`Song: ${name}\n`:null;
@@ -138,6 +118,23 @@ function movieThis(title) {
 }
 
 /**
+ * Function reads from random.txt and runs each command available.
+ */
+function dwis() {
+    fs.readFile("random.txt", "utf8", function(err, response) {
+        if (err) return console.log(err);
+        var perCmd = response.split(" | ");
+
+        //Literally the only way this recursion can work is if there no quotes, afaik.
+        //It tries to search with quotes which errors concert-this. 
+        var list = perCmd.map(x => x.replace('"',"").replace('"',"").split(","));
+        for(each of list) {
+            runCmds(each[0], each[1])
+        }
+    })
+}
+
+/**
  * 
  * @param {String} cmd is the executed command the user put as the first argument.
  * @param {String} data is the response based on the executed command; each function has one response string.
@@ -148,21 +145,10 @@ function logTxt(cmd, data) {
         command: cmd,
         data: data 
     }
-    fs.appendFile("log.txt", JSON.stringify(logData) , function(err) {
+    fs.appendFile("log.txt", JSON.stringify(logData)+"\n", function(err) {
         if (err) return console.log(err);
     })
 }
-
-/*
-     Work Done
- */
-var args = convertProcess(process.argv);
-if (!args[0]) return console.log("You need to specify an action!");
-
-// console.clear(); //Clears console for better readability
-
-//Reads in first input, given by user.
-runCmds(args[0], args.slice(1, args.length).join(" "))
 
 /**
  * 
@@ -193,20 +179,76 @@ function runCmds(input, value){
         break;
 
         case "do-what-it-says":
-            fs.readFile("random.txt", "utf8", function(err, response) {
-                if (err) return console.log(err);
-                var perCmd = response.split(" | ");
-
-                //Literally the only way this recursion can work is if there no quotes, afaik.
-                //It tries to search with quotes which errors concert-this. 
-                var list = perCmd.map(x => x.replace('"',"").replace('"',"").split(","));
-                for(each of list) {
-                    runCmds(each[0], each[1])
-                }
-            })
+            dwis();
         break;
 
         default: console.log("Could not understand the action.");
         break;
     }
 }
+
+/*
+     Beginning of work below
+ */
+
+
+var lookForBand = 'Search an artist/band on bandsintown to see venues.';
+var lookForSong = 'Look for a song on spotify to see info for song/album/artists.';
+var lookForMovie = 'Look for a movie on omdb to see a detailed description. ';
+
+console.clear(); //Clears console for better readability
+
+inquirer
+  .prompt([
+    {
+      type: 'list',
+      name: 'command',
+      message: 'What do you want to do?',
+      choices: [
+        lookForBand,
+        lookForSong,
+        lookForMovie,
+        new inquirer.Separator(),
+        'Read from random.txt to choose for you.',
+      ]
+    }
+  ])
+  .then(answers => {
+    // console.log(JSON.stringify(answers, null, '  '));
+    if (answers.command !== 'Read from random.txt to choose for you.') {
+        var questions = [
+            {
+                type: 'input',
+                name: 'search',
+                message: "What would you like to search?"
+            }
+        ];
+        
+        inquirer.prompt(questions).then(answers2 => {
+            console.clear(); //Clears console for better readability
+            // console.log(JSON.stringify(answers2, null, '  '));
+            if (!answers2.search) return console.log("You did not reply with anything!");
+            switch(answers.command) {
+                case lookForBand:
+                    concertThis(answers2.search);                
+                break;
+
+                case lookForSong:
+                    spotifyThis(answers2.search);                
+                break;
+
+                case lookForMovie:
+                    movieThis(answers2.search);
+                break;
+                
+                default: console.log("Could not understand the action.");
+                break;
+            }
+        });
+    }
+    else {
+        dwis()
+    }
+  });
+
+  
