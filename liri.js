@@ -66,6 +66,7 @@ function spotifyThis(song) {
             var album = data.tracks.items[i].album.name;
             var preview = data.tracks.items[i].preview_url;
             var artists = data.tracks.items[i].album.artists[0].name
+
             //If any of these exist, add it to the response;
             var resp = "";
             name ? resp+=`Song: ${name}\n`:null;
@@ -187,7 +188,7 @@ function runCmds(input, value){
 }
 
 /*
-     Work Done
+     Beginning of work below
  */
 
 
