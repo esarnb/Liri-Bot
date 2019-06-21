@@ -32,6 +32,8 @@ function concertThis(artist) {
     axios.get("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp").then((response) => {
         console.log("----------------------------------------------------------------");
         var finalAnswer = "";
+        if (!response.data.length) return console.log("There are no venues available");
+        
         for (resp of response.data) {
             var theLocation = "";
             var theVenue = resp.venue.name;
@@ -55,12 +57,14 @@ function concertThis(artist) {
  * Function makes an api call to spotify, appends all info available to a string, then logs the string to console and txt file.  
  */
 function spotifyThis(song) {
-    song ? null : song = "The Sign" //"The Sign" by Ace of Base
+    song ? null : song = "The Sign Ace of Base" //"The Sign" by Ace of Base
     spotify.search({ type: 'track', query: song }, function(err, data) {
         if (err) return console.log(err);
         console.log("----------------------------------------------------------------");
         console.log();//spacer
         var finalAnswer = "";
+        if (!data.tracks.items) return console.log("Could not find a song!");
+        
         for (var i = 0; i < data.tracks.items.length; i++) {
             var name = data.tracks.items[i].name
             var album = data.tracks.items[i].album.name;
@@ -91,6 +95,8 @@ function movieThis(title) {
     title ? null : title = "Mr. Nobody" //If no title, use "Mr. Nobody"
     var queryURL = "https://www.omdbapi.com/?t=" + title + "&y=&plot=short&apikey=trilogy";
     axios.get(queryURL).then(function(response) {
+        if (!response.data) return console.log("Could not find the movie!");
+        
         console.log("----------------------------------------------------------------");  
         var resp = "";
         var plot = response.data.Plot;
@@ -227,9 +233,9 @@ inquirer
         inquirer.prompt(questions).then(answers2 => {
             console.clear(); //Clears console for better readability
             // console.log(JSON.stringify(answers2, null, '  '));
-            if (!answers2.search) return console.log("You did not reply with anything!");
             switch(answers.command) {
                 case lookForBand:
+                    if (!answers2.search) return console.log("You did not reply with anything!");
                     concertThis(answers2.search);                
                 break;
 
